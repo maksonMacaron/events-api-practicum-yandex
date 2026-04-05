@@ -2,7 +2,7 @@
 
 namespace EventsAPI.DTOs
 {
-    public class EventDto
+    public class EventDto : IValidatableObject
     {
         public Guid Id { get; set; }
 
@@ -12,10 +12,20 @@ namespace EventsAPI.DTOs
 
         public string? Description { get; set; }
 
-        [Required]
+        [Required(ErrorMessage = "Дата начала обязательна")]
         public DateTime StartAt { get; set; }
 
-        [Required]
+        [Required(ErrorMessage = "Дата окончания обязательна")]
         public DateTime EndAt { get; set; }
+
+        public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+        {
+            if (EndAt <= StartAt)
+            {
+                yield return new ValidationResult(
+                    "Дата окончания должна быть позже даты начала",
+                    new[] { nameof(EndAt), nameof(StartAt) });
+            }
+        }
     }
 }

@@ -10,6 +10,9 @@ using System.Collections;
 
 namespace EventsAPI.Controllers
 {
+    /// <summary>
+    /// Контроллер для работы с мероприятиями.
+    /// </summary>
     [Route("api/[controller]")]
     [ApiController]
     public class EventsController : ControllerBase
@@ -17,12 +20,21 @@ namespace EventsAPI.Controllers
         private readonly IEventService _eventService;
         private readonly IMapper _mapper;
 
+        /// <summary>
+        /// Создаёт экземпляр контроллера мероприятий.
+        /// </summary>
+        /// <param name="eventService">Сервис для работы с мероприятиями.</param>
+        /// <param name="mapper">Сервис маппинга DTO и моделей.</param>
         public EventsController(IEventService eventService, IMapper mapper) 
         { 
             _eventService = eventService;
             _mapper = mapper;
         }
 
+        /// <summary>
+        /// Получить список всех мероприятий.
+        /// </summary>
+        /// <returns>Список всех мероприятий.</returns>
         [HttpGet]
         public IActionResult GetAll()
         {
@@ -36,6 +48,11 @@ namespace EventsAPI.Controllers
             });
         }
 
+        /// <summary>
+        /// Получить мероприятие по идентификатору.
+        /// </summary>
+        /// <param name="id">Идентификатор мероприятия.</param>
+        /// <returns>Найденное мероприятие или ошибка 404, если мероприятие не существует.</returns>
         [HttpGet("{id}")]
         public IActionResult GetById([FromRoute] Guid id)
         {
@@ -61,6 +78,11 @@ namespace EventsAPI.Controllers
             }
         }
 
+        /// <summary>
+        /// Создать новое мероприятие.
+        /// </summary>
+        /// <param name="eventDto">Данные нового мероприятия.</param>
+        /// <returns>Созданное мероприятие.</returns>
         [HttpPost()]
         public IActionResult Create([FromBody] EventDto eventDto)
         {
@@ -88,6 +110,12 @@ namespace EventsAPI.Controllers
             }
         }
 
+        /// <summary>
+        /// Полностью обновить мероприятие по идентификатору.
+        /// </summary>
+        /// <param name="id">Идентификатор мероприятия.</param>
+        /// <param name="eventDto">Новые данные мероприятия.</param>
+        /// <returns>Обновлённое мероприятие или ошибка, если мероприятие не найдено.</returns>
         [HttpPut("{id}")]
         public IActionResult Update([FromRoute] Guid id, [FromBody] EventDto eventDto)
         {
@@ -124,6 +152,11 @@ namespace EventsAPI.Controllers
             }
         }
 
+        /// <summary>
+        /// Удалить мероприятие по идентификатору.
+        /// </summary>
+        /// <param name="id">Идентификатор мероприятия.</param>
+        /// <returns>Пустой ответ, если удаление прошло успешно, или ошибка 404.</returns>
         [HttpDelete("{id}")]
         public IActionResult Delete([FromRoute] Guid id)
         {

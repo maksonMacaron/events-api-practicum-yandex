@@ -24,40 +24,41 @@ namespace EventsAPI.Controllers
         }
 
         [HttpGet]
-        public ApiResult<IEnumerable<EventDto>> GetAll()
+        public IActionResult GetAll()
         {
             var dtos = _mapper.Map<IEnumerable<EventDto>>(_eventService.GetAll());
-            return new ApiResult<IEnumerable<EventDto>>
+            return Ok(new ApiResult<IEnumerable<EventDto>>
             {
                 Data = dtos,
                 Message = "Получаем список всех событий",
                 StatusCode = System.Net.HttpStatusCode.OK,
                 Success = true,
-            };
+            });
         }
 
         [HttpGet("{id}")]
         public IActionResult GetById([FromRoute] Guid id)
         {
-            var findModelEvent = _eventService.GetById(id);
-
-            if (findModelEvent == null)
+            try
             {
+                var findModelEvent = _eventService.GetById(id);
                 return Ok(new ApiResult<EventDto>
                 {
-                    Data = null,
-                    Message = $"Не удалось найти событие по Id: {id.ToString()}",
+                    Data = _mapper.Map<EventDto>(findModelEvent),
+                    Message = $"Событие по Id [{id.ToString()}] получено",
                     StatusCode = System.Net.HttpStatusCode.NotFound,
-                    Success = false,
+                    Success = true,
                 });
             }
-            else return NotFound(new ApiResult<EventDto>
+            catch (KeyNotFoundException ex)
             {
-                Data = _mapper.Map<EventDto>(findModelEvent),
-                Message = $"Найдено событие по Id: {id.ToString()}",
-                StatusCode = System.Net.HttpStatusCode.OK,
-                Success = true,
-            });
+                return NotFound(new ApiResult
+                {
+                    Message = ex.Message,
+                    StatusCode = System.Net.HttpStatusCode.NotFound,
+                    Success = true,
+                });
+            }
         }
 
         [HttpPost()]
@@ -69,7 +70,7 @@ namespace EventsAPI.Controllers
             return Created("Create", new ApiResult<EventDto>
             {
                 Data = _mapper.Map<EventDto>(createEventModel),
-                Message = "Получаем список всех событий",
+                Message = $"Новое событие успешно создано с Id [{createEventModel.Id}]",
                 StatusCode = System.Net.HttpStatusCode.OK,
                 Success = true,
             });
@@ -84,7 +85,7 @@ namespace EventsAPI.Controllers
             return Ok(new ApiResult<EventDto>
             {
                 Data = _mapper.Map<EventDto>(updateEventModel),
-                Message = "Получаем список всех событий",
+                Message = $"Cобытие успешно обновлено по Id [{updateEventModel.Id}]",
                 StatusCode = System.Net.HttpStatusCode.OK,
                 Success = true,
             });

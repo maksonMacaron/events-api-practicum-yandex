@@ -30,7 +30,7 @@ namespace EventsAPI.Controllers
             return Ok(new ApiResult<IEnumerable<EventDto>>
             {
                 Data = dtos,
-                Message = "Получаем список всех событий",
+                Message = $"Список всех событий. Всего {dtos.Count()}",
                 StatusCode = System.Net.HttpStatusCode.OK,
                 Success = true,
             });

@@ -12,12 +12,12 @@ namespace EventsAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class EventController : ControllerBase
+    public class EventsController : ControllerBase
     {
         private readonly IEventService _eventService;
         private readonly IMapper _mapper;
 
-        public EventController(IEventService eventService, IMapper mapper) 
+        public EventsController(IEventService eventService, IMapper mapper) 
         { 
             _eventService = eventService;
             _mapper = mapper;
@@ -46,7 +46,7 @@ namespace EventsAPI.Controllers
                 {
                     Data = _mapper.Map<EventDto>(findModelEvent),
                     Message = $"Событие по Id [{id.ToString()}] получено",
-                    StatusCode = System.Net.HttpStatusCode.NotFound,
+                    StatusCode = System.Net.HttpStatusCode.OK,
                     Success = true,
                 });
             }
@@ -56,7 +56,7 @@ namespace EventsAPI.Controllers
                 {
                     Message = ex.Message,
                     StatusCode = System.Net.HttpStatusCode.NotFound,
-                    Success = true,
+                    Success = false,
                 });
             }
         }
@@ -67,7 +67,7 @@ namespace EventsAPI.Controllers
             var modelEvent = _mapper.Map<Event>(eventDto);
             var createEventModel = _eventService.Create(modelEvent);
 
-            return Created("Create", new ApiResult<EventDto>
+            return Created(createEventModel.Id.ToString(), new ApiResult<EventDto>
             {
                 Data = _mapper.Map<EventDto>(createEventModel),
                 Message = $"Новое событие успешно создано с Id [{createEventModel.Id}]",
@@ -79,16 +79,28 @@ namespace EventsAPI.Controllers
         [HttpPut("{id}")]
         public IActionResult Update([FromRoute] Guid id, [FromBody] EventDto eventDto)
         {
-            var modelEvent = _mapper.Map<Event>(eventDto);
-            var updateEventModel = _eventService.Update(id, modelEvent);
-
-            return Ok(new ApiResult<EventDto>
+            try
             {
-                Data = _mapper.Map<EventDto>(updateEventModel),
-                Message = $"Cобытие успешно обновлено по Id [{updateEventModel.Id}]",
-                StatusCode = System.Net.HttpStatusCode.OK,
-                Success = true,
-            });
+                var modelEvent = _mapper.Map<Event>(eventDto);
+                var updateEventModel = _eventService.Update(id, modelEvent);
+
+                return Ok(new ApiResult<EventDto>
+                {
+                    Data = _mapper.Map<EventDto>(updateEventModel),
+                    Message = $"Cобытие успешно обновлено по Id [{updateEventModel.Id}]",
+                    StatusCode = System.Net.HttpStatusCode.OK,
+                    Success = true,
+                });
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new ApiResult
+                {
+                    Message = ex.Message,
+                    StatusCode = System.Net.HttpStatusCode.NotFound,
+                    Success = false,
+                });
+            }
         }
 
         [HttpDelete("{id}")]

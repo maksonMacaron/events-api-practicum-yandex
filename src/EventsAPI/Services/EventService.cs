@@ -4,6 +4,7 @@ namespace EventsAPI.Services
 {
     public class EventService : IEventService
     {
+
         private static List<Event> _events = new List<Event>()
         {
             new Event("Мероприятие #1", "Тут описание", DateTime.Now, DateTime.Now.AddDays(5)),
@@ -30,7 +31,7 @@ namespace EventsAPI.Services
             return _events;
         }
 
-        public Event? GetById(Guid id)
+        public Event GetById(Guid id)
         {
             Event? findEvent = _events.FirstOrDefault(e => e.Id == id);
             if (findEvent == null)
@@ -40,15 +41,20 @@ namespace EventsAPI.Services
 
         public Event Update(Guid id, Event item)
         {
-            Event? findEvent = GetById(id);
-            if (findEvent == null)
-                throw new KeyNotFoundException($"Событие по Id [{id}] не найдено");
-
-            findEvent.Title = item.Title;
-            findEvent.Description = item.Description;
-            findEvent.StartAt = item.StartAt;
-            findEvent.EndAt = item.EndAt;
-            return findEvent;
+            try
+            {
+                Event? findEvent = GetById(id);
+                findEvent.Title = item.Title;
+                findEvent.Description = item.Description;
+                findEvent.StartAt = item.StartAt;
+                findEvent.EndAt = item.EndAt;
+                return findEvent;
+            }
+            catch (KeyNotFoundException)
+            {
+                throw;
+            }
+            
         }
     }
 }

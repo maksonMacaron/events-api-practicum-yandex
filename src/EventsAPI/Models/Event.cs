@@ -12,6 +12,8 @@
 
         public DateTime EndAt { get; set; }
 
+        public Event() { }
+
         public Event(string title, DateTime startAt, DateTime endAt) 
         {
             Id = Guid.NewGuid();

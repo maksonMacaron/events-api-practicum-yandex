@@ -2,7 +2,7 @@
 {
     public class Event
     {
-        public int Id { get; set; }
+        public Guid Id { get; set; }
 
         public string Title { get; set; }
 
@@ -11,5 +11,22 @@
         public DateTime StartAt { get; set; }
 
         public DateTime EndAt { get; set; }
+
+        public Event(string title, DateTime startAt, DateTime endAt) 
+        {
+            Id = Guid.NewGuid();
+            Title = title;
+            StartAt = startAt;
+            EndAt = endAt;
+        }
+
+        public Event(string title, string? description, DateTime startAt, DateTime endAt)
+        {
+            Id = Guid.NewGuid();
+            Title = title;
+            Description = description;
+            StartAt = startAt;
+            EndAt = endAt;
+        }
     }
 }

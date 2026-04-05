@@ -4,7 +4,7 @@ namespace EventsAPI.DTOs
 {
     public class EventDto
     {
-        public int Id { get; set; }
+        public Guid Id { get; set; }
 
         [Required(AllowEmptyStrings = false, ErrorMessage = "Название события обязателено для заполнения")]
         [StringLength(100, MinimumLength = 3, ErrorMessage = "Название события должно быть от 3 до 100 символов")]

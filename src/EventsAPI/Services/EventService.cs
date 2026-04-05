@@ -21,8 +21,6 @@ namespace EventsAPI.Services
         public void Delete(Guid id)
         {
             Event? findEvent = GetById(id);
-            if (findEvent == null)
-                throw new KeyNotFoundException($"Событие по Id [{id}] не найдено");
             _events.Remove(findEvent);
         }
 
@@ -41,20 +39,12 @@ namespace EventsAPI.Services
 
         public Event Update(Guid id, Event item)
         {
-            try
-            {
-                Event? findEvent = GetById(id);
-                findEvent.Title = item.Title;
-                findEvent.Description = item.Description;
-                findEvent.StartAt = item.StartAt;
-                findEvent.EndAt = item.EndAt;
-                return findEvent;
-            }
-            catch (KeyNotFoundException)
-            {
-                throw;
-            }
-            
+            Event? findEvent = GetById(id);
+            findEvent.Title = item.Title;
+            findEvent.Description = item.Description;
+            findEvent.StartAt = item.StartAt;
+            findEvent.EndAt = item.EndAt;
+            return findEvent;
         }
     }
 }

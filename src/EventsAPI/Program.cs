@@ -1,14 +1,34 @@
 using AutoMapper;
+using EventsAPI.Contracts.Responses;
 using EventsAPI.Mapping;
 using EventsAPI.Services;
+using Microsoft.AspNetCore.Mvc;
+using System.Net;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddOpenApi();
 builder.Services.AddSwaggerGen();
 builder.Services.AddAutoMapper(cfg => { }, typeof(EventProfile));
-builder.Services.AddControllers();
 builder.Services.AddScoped<IEventService, EventService>();
+builder.Services.AddControllers().ConfigureApiBehaviorOptions(options =>
+{
+    options.InvalidModelStateResponseFactory = context =>
+    {
+        var errors = context.ModelState.Where(kv => kv.Value?.Errors.Count > 0).ToDictionary(
+            kv => kv.Key,
+            kv => kv.Value!.Errors.Select(e => e.ErrorMessage));
+
+        var response = new ValidationApiResult()
+        { 
+            StatusCode = HttpStatusCode.BadRequest,
+            Success = false,
+            Errors = errors,
+            Message = "Ошибка валидации"
+        };
+        return new BadRequestObjectResult(response);
+    };
+});
 
 var app = builder.Build();
 

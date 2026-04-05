@@ -6,7 +6,7 @@ namespace EventsAPI.DTOs
     {
         public Guid Id { get; set; }
 
-        [Required(AllowEmptyStrings = false, ErrorMessage = "Название события обязателено для заполнения")]
+        [Required(AllowEmptyStrings = false, ErrorMessage = "Название события обязательно для заполнения")]
         [StringLength(100, MinimumLength = 3, ErrorMessage = "Название события должно быть от 3 до 100 символов")]
         public string Title { get; set; }
 
@@ -20,11 +20,11 @@ namespace EventsAPI.DTOs
 
         public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
         {
-            if (EndAt <= StartAt)
+            if (StartAt >= EndAt)
             {
                 yield return new ValidationResult(
                     "Дата окончания должна быть позже даты начала",
-                    new[] { nameof(EndAt), nameof(StartAt) });
+                    new[] { nameof(EndAt) });
             }
         }
     }

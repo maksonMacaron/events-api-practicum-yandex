@@ -14,14 +14,6 @@
 
         public Event() { }
 
-        public Event(string title, DateTime startAt, DateTime endAt) 
-        {
-            Id = Guid.NewGuid();
-            Title = title;
-            StartAt = startAt;
-            EndAt = endAt;
-        }
-
         public Event(string title, string? description, DateTime startAt, DateTime endAt)
         {
             Id = Guid.NewGuid();

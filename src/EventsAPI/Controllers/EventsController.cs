@@ -45,7 +45,7 @@ namespace EventsAPI.Controllers
                 return Ok(new ApiResult<EventDto>
                 {
                     Data = _mapper.Map<EventDto>(findModelEvent),
-                    Message = $"Событие по Id [{id.ToString()}] получено",
+                    Message = $"Событие по Id [{id}] получено",
                     StatusCode = System.Net.HttpStatusCode.OK,
                     Success = true,
                 });
@@ -64,16 +64,28 @@ namespace EventsAPI.Controllers
         [HttpPost()]
         public IActionResult Create([FromBody] EventDto eventDto)
         {
-            var modelEvent = _mapper.Map<Event>(eventDto);
-            var createEventModel = _eventService.Create(modelEvent);
-
-            return Created(createEventModel.Id.ToString(), new ApiResult<EventDto>
+            try
             {
-                Data = _mapper.Map<EventDto>(createEventModel),
-                Message = $"Новое событие успешно создано с Id [{createEventModel.Id}]",
-                StatusCode = System.Net.HttpStatusCode.OK,
-                Success = true,
-            });
+                var modelEvent = _mapper.Map<Event>(eventDto);
+                var createEventModel = _eventService.Create(modelEvent);
+
+                return Created(createEventModel.Id.ToString(), new ApiResult<EventDto>
+                {
+                    Data = _mapper.Map<EventDto>(createEventModel),
+                    Message = $"Новое событие успешно создано с Id [{createEventModel.Id}]",
+                    StatusCode = System.Net.HttpStatusCode.Created,
+                    Success = true,
+                });
+            }
+            catch (InvalidDataException ex)
+            {
+                return BadRequest(new ApiResult
+                {
+                    Message = ex.Message,
+                    StatusCode = System.Net.HttpStatusCode.BadRequest,
+                    Success = false,
+                });
+            }
         }
 
         [HttpPut("{id}")]
@@ -98,6 +110,15 @@ namespace EventsAPI.Controllers
                 {
                     Message = ex.Message,
                     StatusCode = System.Net.HttpStatusCode.NotFound,
+                    Success = false,
+                });
+            }
+            catch (InvalidDataException ex)
+            {
+                return BadRequest(new ApiResult
+                {
+                    Message = ex.Message,
+                    StatusCode = System.Net.HttpStatusCode.BadRequest,
                     Success = false,
                 });
             }

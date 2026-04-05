@@ -7,8 +7,7 @@ namespace EventsAPI.Contracts.Responses
         public required bool Success { get; set; }
         public required HttpStatusCode StatusCode { get; set; }
         public DateTime DateTime { get; set; } = DateTime.UtcNow;
-        public required string Message { get; set; }
-
+        public string? Message { get; set; }
     }
 
     public class ApiResult : ApiBaseResult { }
@@ -16,5 +15,10 @@ namespace EventsAPI.Contracts.Responses
     public class ApiResult<T> : ApiBaseResult
     {
         public required T? Data { get; set; }
+    }
+
+    public class ValidationApiResult : ApiBaseResult
+    {
+        public required Dictionary<string, IEnumerable<string>> Errors { get; set; }
     }
 }

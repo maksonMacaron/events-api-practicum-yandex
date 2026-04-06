@@ -13,7 +13,7 @@ namespace EventsAPI.Controllers
     /// <summary>
     /// Контроллер для работы с мероприятиями.
     /// </summary>
-    [Route("api/[controller]")]
+    [Route("[controller]")]
     [ApiController]
     public class EventsController : ControllerBase
     {

@@ -17,7 +17,7 @@ namespace EventsAPI.DTOs
         /// </summary>
         [Required(AllowEmptyStrings = false, ErrorMessage = "Название события обязательно для заполнения")]
         [StringLength(100, MinimumLength = 3, ErrorMessage = "Название события должно быть от 3 до 100 символов")]
-        public string Title { get; set; }
+        public required string Title { get; set; }
 
         /// <summary>
         /// Описание мероприятия.

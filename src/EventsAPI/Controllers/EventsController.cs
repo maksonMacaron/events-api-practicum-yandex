@@ -3,10 +3,7 @@ using EventsAPI.Contracts.Responses;
 using EventsAPI.DTOs;
 using EventsAPI.Models;
 using EventsAPI.Services;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Diagnostics;
-using System.Collections;
 
 namespace EventsAPI.Controllers
 {

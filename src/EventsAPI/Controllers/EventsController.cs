@@ -80,34 +80,22 @@ namespace EventsAPI.Controllers
         /// </summary>
         /// <param name="eventDto">Данные нового мероприятия.</param>
         /// <returns>Созданное мероприятие.</returns>
-        [HttpPost()]
+        [HttpPost]
         public IActionResult Create([FromBody] EventDto eventDto)
         {
-            try
-            {
-                var modelEvent = _mapper.Map<Event>(eventDto);
-                var createEventModel = _eventService.Create(modelEvent);
+            var modelEvent = _mapper.Map<Event>(eventDto);
+            var createEventModel = _eventService.Create(modelEvent);
 
-                return CreatedAtAction(
-                    nameof(GetById),
-                    new { id = createEventModel.Id },
-                    new ApiResult<EventDto>
-                    {
-                        Data = _mapper.Map<EventDto>(createEventModel),
-                        Message = $"Новое событие успешно создано с Id [{createEventModel.Id}]",
-                        StatusCode = System.Net.HttpStatusCode.Created,
-                        Success = true,
-                    });
-            }
-            catch (InvalidDataException ex)
-            {
-                return BadRequest(new ApiResult
+            return CreatedAtAction(
+                nameof(GetById),
+                new { id = createEventModel.Id },
+                new ApiResult<EventDto>
                 {
-                    Message = ex.Message,
-                    StatusCode = System.Net.HttpStatusCode.BadRequest,
-                    Success = false,
+                    Data = _mapper.Map<EventDto>(createEventModel),
+                    Message = $"Новое событие успешно создано с Id [{createEventModel.Id}]",
+                    StatusCode = System.Net.HttpStatusCode.Created,
+                    Success = true,
                 });
-            }
         }
 
         /// <summary>
@@ -138,15 +126,6 @@ namespace EventsAPI.Controllers
                 {
                     Message = ex.Message,
                     StatusCode = System.Net.HttpStatusCode.NotFound,
-                    Success = false,
-                });
-            }
-            catch (InvalidDataException ex)
-            {
-                return BadRequest(new ApiResult
-                {
-                    Message = ex.Message,
-                    StatusCode = System.Net.HttpStatusCode.BadRequest,
                     Success = false,
                 });
             }

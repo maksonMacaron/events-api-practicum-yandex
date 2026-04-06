@@ -91,13 +91,16 @@ namespace EventsAPI.Controllers
                 var modelEvent = _mapper.Map<Event>(eventDto);
                 var createEventModel = _eventService.Create(modelEvent);
 
-                return Created(createEventModel.Id.ToString(), new ApiResult<EventDto>
-                {
-                    Data = _mapper.Map<EventDto>(createEventModel),
-                    Message = $"Новое событие успешно создано с Id [{createEventModel.Id}]",
-                    StatusCode = System.Net.HttpStatusCode.Created,
-                    Success = true,
-                });
+                return CreatedAtAction(
+                    nameof(GetById),
+                    new { id = createEventModel.Id },
+                    new ApiResult<EventDto>
+                    {
+                        Data = _mapper.Map<EventDto>(createEventModel),
+                        Message = $"Новое событие успешно создано с Id [{createEventModel.Id}]",
+                        StatusCode = System.Net.HttpStatusCode.Created,
+                        Success = true,
+                    });
             }
             catch (InvalidDataException ex)
             {

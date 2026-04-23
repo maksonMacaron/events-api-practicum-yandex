@@ -24,9 +24,20 @@ namespace EventsAPI.Services
             _events.Remove(findEvent);
         }
 
-        public IEnumerable<Event> GetAll()
+        public IEnumerable<Event> GetAll(string? title, DateTime? from, DateTime? to)
         {
-            return _events;
+            var query = _events.AsEnumerable();
+
+            if (!string.IsNullOrWhiteSpace(title))
+                query = query.Where(e => e.Title.Contains(title, StringComparison.OrdinalIgnoreCase));
+
+            if (from.HasValue)
+                query = query.Where(e => e.StartAt >= from);
+
+            if (to.HasValue)
+                query = query.Where(e => e.EndAt <= to);
+
+            return query;
         }
 
         public Event GetById(Guid id)

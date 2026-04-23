@@ -28,14 +28,21 @@ namespace EventsAPI.Controllers
             _mapper = mapper;
         }
 
+
         /// <summary>
         /// Получить список всех мероприятий.
         /// </summary>
-        /// <returns>Список всех мероприятий.</returns>
+        /// <param name="title">Наименование мероприятия (регистронезависимый, частичное совпадение)</param>
+        /// <param name="from">Дата события, которые начинаются не раньше указанной</param>
+        /// <param name="to">Дата событий, которые заканчиваются не позже указанной даты</param>
+        /// <returns>Список мероприятий согласно фильтру или все мероприятия</returns>
         [HttpGet]
-        public IActionResult GetAll()
+        public IActionResult GetAll(
+            [FromQuery] string? title,
+            [FromQuery] DateTime? from,
+            [FromQuery] DateTime? to)
         {
-            var dtos = _mapper.Map<IEnumerable<EventDto>>(_eventService.GetAll());
+            var dtos = _mapper.Map<IEnumerable<EventDto>>(_eventService.GetAll(title, from, to));
             return Ok(new ApiResult<IEnumerable<EventDto>>
             {
                 Data = dtos,

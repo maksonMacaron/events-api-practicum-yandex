@@ -1,6 +1,7 @@
 using AutoMapper;
 using EventsAPI.Contracts.Responses;
 using EventsAPI.Mapping;
+using EventsAPI.Middlewares;
 using EventsAPI.Services;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
@@ -36,6 +37,8 @@ builder.Services.AddControllers().ConfigureApiBehaviorOptions(options =>
 });
 
 var app = builder.Build();
+
+app.UseMiddleware<GlobalExceptionHandlingMiddleware>();
 
 if (app.Environment.IsDevelopment())
 {

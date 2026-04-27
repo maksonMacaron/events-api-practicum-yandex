@@ -1,4 +1,6 @@
-﻿namespace EventsAPI.Models
+﻿using System.Diagnostics.CodeAnalysis;
+
+namespace EventsAPI.Models
 {
     /// <summary>
     /// Модель мероприятия.
@@ -42,6 +44,7 @@
         /// <param name="description">Описание мероприятия.</param>
         /// <param name="startAt">Дата и время начала.</param>
         /// <param name="endAt">Дата и время окончания.</param>
+        [SetsRequiredMembers]
         public Event(string title, string? description, DateTime startAt, DateTime endAt)
         {
             Id = Guid.NewGuid();

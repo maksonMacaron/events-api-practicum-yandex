@@ -3,6 +3,7 @@ using EventsAPI.Contracts.Responses;
 using EventsAPI.DTOs;
 using EventsAPI.Models;
 using EventsAPI.Services;
+using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EventsAPI.Controllers
@@ -28,18 +29,39 @@ namespace EventsAPI.Controllers
             _mapper = mapper;
         }
 
+
         /// <summary>
         /// Получить список всех мероприятий.
         /// </summary>
-        /// <returns>Список всех мероприятий.</returns>
+        /// <param name="page">Номер страницы для пагинации</param>
+        /// <param name="pageSize">Размер страницы для пагинации</param>
+        /// <param name="title">Наименование мероприятия (регистронезависимый, частичное совпадение)</param>
+        /// <param name="from">Дата события, которые начинаются не раньше указанной</param>
+        /// <param name="to">Дата событий, которые заканчиваются не позже указанной даты</param>
+        /// <returns>Список мероприятий согласно фильтру или все мероприятия</returns>
         [HttpGet]
-        public IActionResult GetAll()
+        public IActionResult GetAll(
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 10,
+            [FromQuery] string? title = null,
+            [FromQuery] DateTime? from = null,
+            [FromQuery] DateTime? to = null)
         {
-            var dtos = _mapper.Map<IEnumerable<EventDto>>(_eventService.GetAll());
-            return Ok(new ApiResult<IEnumerable<EventDto>>
+            var serviceResult = _eventService.GetAll(page, pageSize, title, from, to);
+
+            var dtoResult = new PaginatedResult<EventDto>
             {
-                Data = dtos,
-                Message = $"Список всех событий. Всего {dtos.Count()}",
+                Page = serviceResult.Page,
+                PageSize = serviceResult.PageSize,
+                Total = serviceResult.Total,
+                Count = serviceResult.Count,
+                Items = _mapper.Map<IEnumerable<EventDto>>(serviceResult.Items)
+            };
+            
+            return Ok(new ApiResult<PaginatedResult<EventDto>>
+            {
+                Data = dtoResult,
+                Message = $"Список всех событий. Всего {dtoResult.Total}",
                 StatusCode = System.Net.HttpStatusCode.OK,
                 Success = true,
             });

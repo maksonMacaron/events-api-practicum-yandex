@@ -8,10 +8,18 @@ namespace EventsAPI.Services
         /// <summary>Создаёт бронь для мероприятия.</summary>
         /// <param name="eventId">Идентификатор мероприятия.</param>
         /// <returns>Созданная бронь.</returns>
-        Booking CreateBookingAsync(Guid eventId);
+        Task<Booking> CreateBookingAsync(Guid eventId);
         /// <summary>Находит бронь по идентификатору.</summary>
         /// <param name="bookingId">Идентификатор брони.</param>
         /// <returns>Найденная бронь.</returns>
-        Booking GetBookingByIdAsync(Guid bookingId);
+        Task<Booking> GetBookingByIdAsync(Guid bookingId);
+
+        /// <summary>Возвращает брони, ожидающие обработки.</summary>
+        /// <returns>Список ожидающих броней.</returns>
+        IReadOnlyList<Booking> GetPendingBookings();
+
+        /// <summary>Подтверждает ожидающую бронь.</summary>
+        /// <param name="bookingId">Идентификатор брони.</param>
+        void ConfirmBooking(Guid bookingId);
     }
 }

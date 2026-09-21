@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace EventsAPI.Models;
 
 /// <summary>
@@ -50,6 +52,7 @@ public class Booking
 }
 
 /// <summary>Состояние обработки брони.</summary>
+[JsonConverter(typeof(JsonStringEnumConverter<BookingStatus>))]
 public enum BookingStatus
 {
     /// <summary>Бронь ожидает обработки.</summary>

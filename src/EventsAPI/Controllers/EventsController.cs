@@ -184,13 +184,33 @@ namespace EventsAPI.Controllers
         /// Создать бронь для мероприятия.
         /// </summary>
         /// <param name="id">Идентификатор мероприятия.</param>
-        /// <returns>Ответ о принятии брони в обработку.</returns>
+        /// <returns>Созданная бронь со статусом 202 и ссылкой на её ресурс либо ошибка 404.</returns>
         [HttpPost("{id:guid}/book")]
-        public IActionResult CreateBookingAsync([FromRoute] Guid id)
+        [ProducesResponseType(typeof(ApiResult<Booking>), StatusCodes.Status202Accepted)]
+        [ProducesResponseType(typeof(ApiResult), StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> CreateBookingAsync([FromRoute] Guid id)
         {
-            var createBookingModel = _bookingService.CreateBookingAsync(id);
+            try
+            {
+                var booking = await _bookingService.CreateBookingAsync(id);
 
-            return Accepted();
+                return AcceptedAtRoute("GetBookingById", new { id = booking.Id }, new ApiResult<Booking>
+                {
+                    Data = booking,
+                    Message = $"Бронь по Id [{booking.Id}] принята в обработку",
+                    StatusCode = System.Net.HttpStatusCode.Accepted,
+                    Success = true,
+                });
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new ApiResult
+                {
+                    Message = ex.Message,
+                    StatusCode = System.Net.HttpStatusCode.NotFound,
+                    Success = false,
+                });
+            }
         }
 
     }

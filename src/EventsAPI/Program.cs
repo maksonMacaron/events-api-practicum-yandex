@@ -1,5 +1,6 @@
 using AutoMapper;
 using EventsAPI.Contracts.Responses;
+using EventsAPI.DataAccess;
 using EventsAPI.Mapping;
 using EventsAPI.Middlewares;
 using EventsAPI.Services;
@@ -17,6 +18,8 @@ builder.Services.AddSwaggerGen(options =>
 });
 builder.Services.AddAutoMapper(cfg => { }, typeof(EventProfile));
 builder.Services.AddScoped<IEventService, EventService>();
+builder.Services.AddSingleton<InMemoryBookingStore>();
+builder.Services.AddScoped<IBookingService, BookingService>();
 builder.Services.AddControllers().ConfigureApiBehaviorOptions(options =>
 {
     options.InvalidModelStateResponseFactory = context =>

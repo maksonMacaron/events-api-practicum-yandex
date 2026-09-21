@@ -16,16 +16,19 @@ namespace EventsAPI.Controllers
     public class EventsController : ControllerBase
     {
         private readonly IEventService _eventService;
+        private readonly IBookingService _bookingService;
         private readonly IMapper _mapper;
 
         /// <summary>
         /// Создаёт экземпляр контроллера мероприятий.
         /// </summary>
         /// <param name="eventService">Сервис для работы с мероприятиями.</param>
+        /// <param name="bookingService">Сервис для работы с бронированиями.</param>
         /// <param name="mapper">Сервис маппинга DTO и моделей.</param>
-        public EventsController(IEventService eventService, IMapper mapper) 
+        public EventsController(IEventService eventService, IBookingService bookingService, IMapper mapper)
         { 
             _eventService = eventService;
+            _bookingService = bookingService;
             _mapper = mapper;
         }
 
@@ -175,6 +178,19 @@ namespace EventsAPI.Controllers
                     StatusCode = System.Net.HttpStatusCode.NotFound,
                 });
             }
+        }
+
+        /// <summary>
+        /// Создать бронь для мероприятия.
+        /// </summary>
+        /// <param name="id">Идентификатор мероприятия.</param>
+        /// <returns>Ответ о принятии брони в обработку.</returns>
+        [HttpPost("{id:guid}/book")]
+        public IActionResult CreateBookingAsync([FromRoute] Guid id)
+        {
+            var createBookingModel = _bookingService.CreateBookingAsync(id);
+
+            return Accepted();
         }
 
     }

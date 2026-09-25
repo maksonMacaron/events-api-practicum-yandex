@@ -1,15 +1,16 @@
-﻿using EventsAPI.DTOs;
+using System.Collections.Concurrent;
+using EventsAPI.DTOs;
 using EventsAPI.Models;
 
 namespace EventsAPI.Services
 {
     public class EventService : IEventService
     {
-        private readonly List<Event> _events;
+        private readonly ConcurrentDictionary<Guid, Event> _events;
 
         public EventService()
         {
-            _events = new List<Event>
+            var events = new List<Event>
             {
                 new Event("Мероприятие #1", "Тут описание", DateTime.Now, DateTime.Now.AddDays(5)),
                 new Event("Еще одно какое-то мероприятие", null, DateTime.Now.AddDays(10), DateTime.Now.AddDays(20)),
@@ -19,29 +20,33 @@ namespace EventsAPI.Services
                 new Event("Спектакль Мартышка", null, DateTime.Now.AddDays(28), DateTime.Now.AddDays(30)),
                 new Event("Спектакль Пикова дама", null, DateTime.Now.AddDays(30), DateTime.Now.AddDays(35)),
             };
+
+            _events = new ConcurrentDictionary<Guid, Event>(
+                events.ToDictionary(item => item.Id));
         }
 
         public EventService(List<Event> events)
         {
-            _events = events;
+            _events = new ConcurrentDictionary<Guid, Event>(
+                events.ToDictionary(item => item.Id));
         }
 
         public Event Create(Event item)
         {
             var eventNew = new Event(item.Title, item.Description, item.StartAt, item.EndAt);
-            _events.Add(eventNew);
+            _events.TryAdd(eventNew.Id, eventNew);
             return eventNew;
         }
 
         public void Delete(Guid id)
         {
             var findEvent = GetById(id);
-            _events.Remove(findEvent);
+            _events.TryRemove(findEvent.Id, out _);
         }
 
         public PaginatedResult<Event> GetAll(int page, int pageSize, string? title, DateTime? from, DateTime? to)
         {
-            var query = _events.AsEnumerable();
+            var query = _events.Values.AsEnumerable();
 
             if (!string.IsNullOrWhiteSpace(title))
                 query = query.Where(e => e.Title.Contains(title, StringComparison.OrdinalIgnoreCase));
@@ -71,9 +76,7 @@ namespace EventsAPI.Services
 
         public Event GetById(Guid id)
         {
-            var findEvent = _events.FirstOrDefault(e => e.Id == id);
-
-            if (findEvent == null)
+            if (!_events.TryGetValue(id, out var findEvent))
                 throw new KeyNotFoundException($"Событие по Id [{id}] не найдено");
 
             return findEvent;

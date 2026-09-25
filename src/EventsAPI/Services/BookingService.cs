@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using EventsAPI.Models;
 
 namespace EventsAPI.Services
@@ -6,7 +7,7 @@ namespace EventsAPI.Services
     public class BookingService : IBookingService
     {
         private readonly IEventService _eventService;
-        private readonly List<Booking> _bookings = new();
+        private readonly ConcurrentDictionary<Guid, Booking> _bookings = new();
 
         /// <summary>Создаёт сервис бронирований.</summary>
         /// <param name="eventService">Сервис для проверки существования мероприятий.</param>
@@ -21,7 +22,7 @@ namespace EventsAPI.Services
             _eventService.GetById(eventId);
 
             var booking = new Booking(eventId);
-            _bookings.Add(booking);
+            _bookings.TryAdd(booking.Id, booking);
 
             return Task.FromResult(booking);
         }
@@ -29,9 +30,7 @@ namespace EventsAPI.Services
         /// <inheritdoc />
         public Task<Booking> GetBookingByIdAsync(Guid bookingId)
         {
-            var booking = _bookings.FirstOrDefault(item => item.Id == bookingId);
-
-            if (booking is null)
+            if (!_bookings.TryGetValue(bookingId, out var booking))
                 throw new KeyNotFoundException($"Бронь по Id [{bookingId}] не найдена");
 
             return Task.FromResult(booking);
@@ -39,16 +38,26 @@ namespace EventsAPI.Services
 
         /// <inheritdoc />
         public IReadOnlyList<Booking> GetPendingBookings() =>
-            _bookings.Where(booking => booking.Status == BookingStatus.Pending).ToList();
+            _bookings.Values.Where(booking => booking.Status == BookingStatus.Pending).ToList();
 
         /// <inheritdoc />
         public void ConfirmBooking(Guid bookingId)
         {
-            var booking = _bookings.FirstOrDefault(item => item.Id == bookingId)
-                ?? throw new KeyNotFoundException($"Бронь по Id [{bookingId}] не найдена");
+            if (!_bookings.TryGetValue(bookingId, out var booking))
+                throw new KeyNotFoundException($"Бронь по Id [{bookingId}] не найдена");
 
             if (booking.Status == BookingStatus.Pending)
                 booking.Confirm();
+        }
+
+        /// <inheritdoc />
+        public void RejectBooking(Guid bookingId)
+        {
+            if (!_bookings.TryGetValue(bookingId, out var booking))
+                throw new KeyNotFoundException($"Бронь по Id [{bookingId}] не найдена");
+
+            if (booking.Status == BookingStatus.Pending)
+                booking.Reject();
         }
     }
 }

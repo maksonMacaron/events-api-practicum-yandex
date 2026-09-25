@@ -21,5 +21,9 @@ namespace EventsAPI.Services
         /// <summary>Подтверждает ожидающую бронь.</summary>
         /// <param name="bookingId">Идентификатор брони.</param>
         void ConfirmBooking(Guid bookingId);
+
+        /// <summary>Отклоняет ожидающую бронь.</summary>
+        /// <param name="bookingId">Идентификатор брони.</param>
+        void RejectBooking(Guid bookingId);
     }
 }

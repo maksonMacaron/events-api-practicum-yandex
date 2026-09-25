@@ -28,7 +28,7 @@ builder.Services.AddControllers().ConfigureApiBehaviorOptions(options =>
             kv => kv.Value!.Errors.Select(e => e.ErrorMessage));
 
         var response = new ValidationApiResult()
-        { 
+        {
             StatusCode = HttpStatusCode.BadRequest,
             Success = false,
             Errors = errors,

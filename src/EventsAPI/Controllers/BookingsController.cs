@@ -8,7 +8,7 @@ namespace EventsAPI.Controllers
     /// <summary>
     /// Контроллер для работы с бронированиями.
     /// </summary>
-    [Route("[controller]")]
+    [Route("bookings")]
     [ApiController]
     public class BookingsController : ControllerBase
     {
@@ -31,28 +31,18 @@ namespace EventsAPI.Controllers
         /// <param name="id">Идентификатор брони.</param>
         /// <returns>Найденная бронь или ошибка 404, если бронь не существует.</returns>
         [HttpGet("{id:guid}", Name = "GetBookingById")]
+        [ProducesResponseType(typeof(ApiResult<Booking>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResult), StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetBookingByIdAsync([FromRoute] Guid id)
         {
-            try
+            var booking = await _bookingService.GetBookingByIdAsync(id);
+            return Ok(new ApiResult<Booking>
             {
-                var booking = await _bookingService.GetBookingByIdAsync(id);
-                return Ok(new ApiResult<Booking>
-                {
-                    Data = booking,
-                    Message = $"Бронь по Id [{id}] получена",
-                    StatusCode = System.Net.HttpStatusCode.OK,
-                    Success = true,
-                });
-            }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(new ApiResult
-                {
-                    Message = ex.Message,
-                    StatusCode = System.Net.HttpStatusCode.NotFound,
-                    Success = false,
-                });
-            }
+                Data = booking,
+                Message = $"Бронь по Id [{id}] получена",
+                StatusCode = System.Net.HttpStatusCode.OK,
+                Success = true,
+            });
         }
     }
 }

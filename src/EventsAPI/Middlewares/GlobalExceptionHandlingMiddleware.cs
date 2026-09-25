@@ -1,5 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
+using System.Net;
+using EventsAPI.Contracts.Responses;
 
 namespace EventsAPI.Middlewares
 {
@@ -47,10 +48,11 @@ namespace EventsAPI.Middlewares
             httpContext.Response.StatusCode = statusCode;
             httpContext.Response.ContentType = "application/json";
 
-            var error = new ProblemDetails
+            var error = new ApiResult
             {
-                Status = statusCode,
-                Detail = ex.Message
+                StatusCode = (HttpStatusCode)statusCode,
+                Success = false,
+                Message = ex.Message
             };
 
             await httpContext.Response.WriteAsJsonAsync(error);
@@ -59,8 +61,8 @@ namespace EventsAPI.Middlewares
         private static int MapStatusCode(Exception ex)
             => ex switch
             {
-                ValidationException ve => StatusCodes.Status400BadRequest,
-                KeyNotFoundException nf => StatusCodes.Status404NotFound,
+                ValidationException => StatusCodes.Status400BadRequest,
+                KeyNotFoundException => StatusCodes.Status404NotFound,
                 _ => StatusCodes.Status500InternalServerError
             };
     }

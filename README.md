@@ -61,7 +61,9 @@ dotnet run --project src/EventsAPI/EventsAPI.csproj --launch-profile http
 
 После запуска открой:
 
-http://localhost:5028/swagger
+`http://localhost:<port>/swagger`
+
+Точный адрес и порт выводятся командой `dotnet run` в строке `Now listening on`.
 
 ---
 

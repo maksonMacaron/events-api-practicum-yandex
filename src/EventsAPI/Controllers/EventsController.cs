@@ -3,7 +3,6 @@ using EventsAPI.Contracts.Responses;
 using EventsAPI.DTOs;
 using EventsAPI.Models;
 using EventsAPI.Services;
-using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EventsAPI.Controllers
@@ -16,16 +15,19 @@ namespace EventsAPI.Controllers
     public class EventsController : ControllerBase
     {
         private readonly IEventService _eventService;
+        private readonly IBookingService _bookingService;
         private readonly IMapper _mapper;
 
         /// <summary>
         /// Создаёт экземпляр контроллера мероприятий.
         /// </summary>
         /// <param name="eventService">Сервис для работы с мероприятиями.</param>
+        /// <param name="bookingService">Сервис для работы с бронированиями.</param>
         /// <param name="mapper">Сервис маппинга DTO и моделей.</param>
-        public EventsController(IEventService eventService, IMapper mapper) 
-        { 
+        public EventsController(IEventService eventService, IBookingService bookingService, IMapper mapper)
+        {
             _eventService = eventService;
+            _bookingService = bookingService;
             _mapper = mapper;
         }
 
@@ -57,7 +59,7 @@ namespace EventsAPI.Controllers
                 Count = serviceResult.Count,
                 Items = _mapper.Map<IEnumerable<EventDto>>(serviceResult.Items)
             };
-            
+
             return Ok(new ApiResult<PaginatedResult<EventDto>>
             {
                 Data = dtoResult,
@@ -75,26 +77,14 @@ namespace EventsAPI.Controllers
         [HttpGet("{id}")]
         public IActionResult GetById([FromRoute] Guid id)
         {
-            try
+            var findModelEvent = _eventService.GetById(id);
+            return Ok(new ApiResult<EventDto>
             {
-                var findModelEvent = _eventService.GetById(id);
-                return Ok(new ApiResult<EventDto>
-                {
-                    Data = _mapper.Map<EventDto>(findModelEvent),
-                    Message = $"Событие по Id [{id}] получено",
-                    StatusCode = System.Net.HttpStatusCode.OK,
-                    Success = true,
-                });
-            }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(new ApiResult
-                {
-                    Message = ex.Message,
-                    StatusCode = System.Net.HttpStatusCode.NotFound,
-                    Success = false,
-                });
-            }
+                Data = _mapper.Map<EventDto>(findModelEvent),
+                Message = $"Событие по Id [{id}] получено",
+                StatusCode = System.Net.HttpStatusCode.OK,
+                Success = true,
+            });
         }
 
         /// <summary>
@@ -129,28 +119,16 @@ namespace EventsAPI.Controllers
         [HttpPut("{id}")]
         public IActionResult Update([FromRoute] Guid id, [FromBody] EventDto eventDto)
         {
-            try
-            {
-                var modelEvent = _mapper.Map<Event>(eventDto);
-                var updateEventModel = _eventService.Update(id, modelEvent);
+            var modelEvent = _mapper.Map<Event>(eventDto);
+            var updateEventModel = _eventService.Update(id, modelEvent);
 
-                return Ok(new ApiResult<EventDto>
-                {
-                    Data = _mapper.Map<EventDto>(updateEventModel),
-                    Message = $"Cобытие успешно обновлено по Id [{updateEventModel.Id}]",
-                    StatusCode = System.Net.HttpStatusCode.OK,
-                    Success = true,
-                });
-            }
-            catch (KeyNotFoundException ex)
+            return Ok(new ApiResult<EventDto>
             {
-                return NotFound(new ApiResult
-                {
-                    Message = ex.Message,
-                    StatusCode = System.Net.HttpStatusCode.NotFound,
-                    Success = false,
-                });
-            }
+                Data = _mapper.Map<EventDto>(updateEventModel),
+                Message = $"Cобытие успешно обновлено по Id [{updateEventModel.Id}]",
+                StatusCode = System.Net.HttpStatusCode.OK,
+                Success = true,
+            });
         }
 
         /// <summary>
@@ -161,20 +139,29 @@ namespace EventsAPI.Controllers
         [HttpDelete("{id}")]
         public IActionResult Delete([FromRoute] Guid id)
         {
-            try
+            _eventService.Delete(id);
+            return NoContent();
+        }
+
+        /// <summary>
+        /// Создать бронь для мероприятия.
+        /// </summary>
+        /// <param name="id">Идентификатор мероприятия.</param>
+        /// <returns>Созданная бронь со статусом 202 и ссылкой на её ресурс либо ошибка 404.</returns>
+        [HttpPost("{id:guid}/book")]
+        [ProducesResponseType(typeof(ApiResult<Booking>), StatusCodes.Status202Accepted)]
+        [ProducesResponseType(typeof(ApiResult), StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> CreateBookingAsync([FromRoute] Guid id)
+        {
+            var booking = await _bookingService.CreateBookingAsync(id);
+
+            return AcceptedAtRoute("GetBookingById", new { id = booking.Id }, new ApiResult<Booking>
             {
-                _eventService.Delete(id);
-                return NoContent();
-            }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(new ApiResult
-                {
-                    Success = false,
-                    Message = ex.Message,
-                    StatusCode = System.Net.HttpStatusCode.NotFound,
-                });
-            }
+                Data = booking,
+                Message = $"Бронь по Id [{booking.Id}] принята в обработку",
+                StatusCode = System.Net.HttpStatusCode.Accepted,
+                Success = true,
+            });
         }
 
     }

@@ -16,7 +16,9 @@ builder.Services.AddSwaggerGen(options =>
     options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
 });
 builder.Services.AddAutoMapper(cfg => { }, typeof(EventProfile));
-builder.Services.AddScoped<IEventService, EventService>();
+builder.Services.AddSingleton<IEventService, EventService>();
+builder.Services.AddSingleton<IBookingService, BookingService>();
+builder.Services.AddHostedService<BookingProcessingService>();
 builder.Services.AddControllers().ConfigureApiBehaviorOptions(options =>
 {
     options.InvalidModelStateResponseFactory = context =>
@@ -26,7 +28,7 @@ builder.Services.AddControllers().ConfigureApiBehaviorOptions(options =>
             kv => kv.Value!.Errors.Select(e => e.ErrorMessage));
 
         var response = new ValidationApiResult()
-        { 
+        {
             StatusCode = HttpStatusCode.BadRequest,
             Success = false,
             Errors = errors,
